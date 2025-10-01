@@ -24,11 +24,16 @@ export default function Products() {
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const data = await loadPortfolioData('/src/data/hdfc-long-daily.xlsx');
+      console.log('Starting to load portfolio data...');
+      const data = await loadPortfolioData('/data/hdfc-long-daily.xlsx');
+      console.log('Loaded data:', data);
       if (data) {
+        console.log('Setting aggregate data:', data.aggregate);
         setAggregateData(data.aggregate);
         setBasketData(data.basket);
         setTickerData(data.ticker);
+      } else {
+        console.error('Failed to load data');
       }
       setLoading(false);
     }

@@ -26,21 +26,35 @@ export interface TickerData {
 
 export async function loadPortfolioData(filePath: string) {
   try {
+    console.log('Fetching file from:', filePath);
     const response = await fetch(filePath);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
+    }
+    
     const arrayBuffer = await response.arrayBuffer();
+    console.log('ArrayBuffer size:', arrayBuffer.byteLength);
+    
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    console.log('Workbook sheets:', workbook.SheetNames);
 
     // Extract Aggregate data (first sheet)
     const aggregateSheet = workbook.Sheets[workbook.SheetNames[0]];
     const aggregateData = XLSX.utils.sheet_to_json(aggregateSheet);
+    console.log('Aggregate data rows:', aggregateData.length);
+    console.log('First aggregate row:', aggregateData[0]);
 
     // Extract Basket data (second sheet)
     const basketSheet = workbook.Sheets[workbook.SheetNames[1]];
     const basketData = XLSX.utils.sheet_to_json(basketSheet);
+    console.log('Basket data rows:', basketData.length);
+    console.log('First basket row:', basketData[0]);
 
     // Extract Ticker data (third sheet, if it exists)
     const tickerSheet = workbook.Sheets[workbook.SheetNames[2]];
     const tickerData = tickerSheet ? XLSX.utils.sheet_to_json(tickerSheet) : [];
+    console.log('Ticker data rows:', tickerData.length);
 
     return {
       aggregate: processAggregateData(aggregateData),
