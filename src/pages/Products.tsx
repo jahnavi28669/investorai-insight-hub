@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProductSelector } from "@/components/ProductSelector";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AggregateMetrics } from "@/components/AggregateMetrics";
 import { AnalysisSelector } from "@/components/AnalysisSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { loadPortfolioData, getTopPerformers, getWorstPerformers, getSectorAnalysis } from "@/services/portfolioDataService";
+import type { AggregateMetrics as AggregateData, BasketData, TickerData } from "@/services/portfolioDataService";
 
 export default function Products() {
   const [selectedProduct, setSelectedProduct] = useState("Alpha Titan");
@@ -12,16 +15,25 @@ export default function Products() {
   const [reportingType, setReportingType] = useState<"daily" | "chained" | "tranching">("daily");
   const [basketAnalysis, setBasketAnalysis] = useState("portfolio-benchmark");
   const [tickerAnalysis, setTickerAnalysis] = useState("top-performers");
+  
+  const [aggregateData, setAggregateData] = useState<AggregateData | null>(null);
+  const [basketData, setBasketData] = useState<BasketData[]>([]);
+  const [tickerData, setTickerData] = useState<TickerData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
-  const aggregateData = {
-    beatRatio: 0.68,
-    avgBasketReturn: 0.0245,
-    basketVolatility: 0.0156,
-    numberOfBaskets: 24,
-    avgDrawdown: -0.0312,
-    winRatio: 0.72,
-  };
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const data = await loadPortfolioData('/src/data/hdfc-long-daily.xlsx');
+      if (data) {
+        setAggregateData(data.aggregate);
+        setBasketData(data.basket);
+        setTickerData(data.ticker);
+      }
+      setLoading(false);
+    }
+    loadData();
+  }, []);
 
   const basketOptions = [
     { value: "portfolio-benchmark", label: "Portfolio vs Benchmark" },
@@ -44,11 +56,17 @@ export default function Products() {
     partners: "HDFC, YES Bank",
   };
 
-  const mockBasketData = [
-    { date: "2024-01-15", basketReturn: 2.4, indexReturn: 1.8 },
-    { date: "2024-01-22", basketReturn: -1.2, indexReturn: -0.8 },
-    { date: "2024-01-29", basketReturn: 3.1, indexReturn: 2.2 },
-  ];
+  const topPerformers = getTopPerformers(tickerData, 10);
+  const worstPerformers = getWorstPerformers(tickerData, 10);
+  const sectorAnalysis = getSectorAnalysis(tickerData);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-muted-foreground">Loading portfolio data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -88,7 +106,7 @@ export default function Products() {
         </TabsList>
 
         <TabsContent value="aggregate" className="space-y-4">
-          <AggregateMetrics {...aggregateData} />
+          {aggregateData && <AggregateMetrics {...aggregateData} />}
         </TabsContent>
 
         <TabsContent value="basket" className="space-y-4">
@@ -105,9 +123,30 @@ export default function Products() {
                 <CardTitle className="text-foreground">Portfolio vs Benchmark Returns</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-80 flex items-center justify-center text-muted-foreground">
-                  Chart: Bar graph showing portfolio vs benchmark returns by date
-                </div>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={basketData.slice(0, 20)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="basketReturn" fill="hsl(var(--primary))" name="Portfolio Return (%)" />
+                    <Bar dataKey="indexReturn" fill="hsl(var(--secondary))" name="Index Return (%)" />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           )}
@@ -118,28 +157,30 @@ export default function Products() {
                 <CardTitle className="text-foreground">Individual Basket Performance</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-foreground">Date</TableHead>
-                      <TableHead className="text-foreground">Basket Return (%)</TableHead>
-                      <TableHead className="text-foreground">Index Return (%)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockBasketData.map((row, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell className="text-foreground">{row.date}</TableCell>
-                        <TableCell className={row.basketReturn > 0 ? "text-success" : "text-destructive"}>
-                          {row.basketReturn.toFixed(2)}%
-                        </TableCell>
-                        <TableCell className={row.indexReturn > 0 ? "text-success" : "text-destructive"}>
-                          {row.indexReturn.toFixed(2)}%
-                        </TableCell>
+                <div className="max-h-[600px] overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-foreground sticky top-0 bg-card">Date</TableHead>
+                        <TableHead className="text-foreground sticky top-0 bg-card">Basket Return (%)</TableHead>
+                        <TableHead className="text-foreground sticky top-0 bg-card">Index Return (%)</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {basketData.map((row, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell className="text-foreground">{row.date}</TableCell>
+                          <TableCell className={row.basketReturn > 0 ? "text-success" : "text-destructive"}>
+                            {row.basketReturn.toFixed(2)}%
+                          </TableCell>
+                          <TableCell className={row.indexReturn > 0 ? "text-success" : "text-destructive"}>
+                            {row.indexReturn.toFixed(2)}%
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -160,11 +201,113 @@ export default function Products() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80 flex items-center justify-center text-muted-foreground">
-                {tickerAnalysis === "individual-ticker" 
-                  ? "Table: Individual ticker performance data"
-                  : "Chart: Bar graph for selected analysis"}
-              </div>
+              {tickerAnalysis === "top-performers" && (
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={topPerformers}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="ticker" 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="return" fill="hsl(var(--success))" name="Return (%)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+
+              {tickerAnalysis === "worst-performers" && (
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={worstPerformers}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="ticker" 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="return" fill="hsl(var(--destructive))" name="Return (%)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+
+              {tickerAnalysis === "sector-analysis" && (
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={sectorAnalysis}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="sector" 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={100}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="avgReturn" fill="hsl(var(--primary))" name="Avg Return (%)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+
+              {tickerAnalysis === "individual-ticker" && (
+                <div className="max-h-[600px] overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-foreground sticky top-0 bg-card">Ticker</TableHead>
+                        <TableHead className="text-foreground sticky top-0 bg-card">Date</TableHead>
+                        <TableHead className="text-foreground sticky top-0 bg-card">Return (%)</TableHead>
+                        <TableHead className="text-foreground sticky top-0 bg-card">Sector</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tickerData.slice(0, 100).map((row, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell className="text-foreground font-medium">{row.ticker}</TableCell>
+                          <TableCell className="text-foreground">{row.date}</TableCell>
+                          <TableCell className={row.return > 0 ? "text-success" : "text-destructive"}>
+                            {row.return.toFixed(2)}%
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{row.gicsSector}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
