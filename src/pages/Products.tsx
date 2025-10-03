@@ -128,17 +128,21 @@ export default function Products() {
                 <CardTitle className="text-foreground">Portfolio vs Benchmark Returns</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={basketData.slice(0, 20)}>
+                <ResponsiveContainer width="100%" height={Math.max(400, basketData.length * 8)}>
+                  <BarChart data={basketData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
                       dataKey="date" 
                       stroke="hsl(var(--muted-foreground))"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))"
                       tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      label={{ value: 'Return (%)', angle: -90, position: 'insideLeft' }}
                     />
                     <Tooltip 
                       contentStyle={{
@@ -148,8 +152,8 @@ export default function Products() {
                       }}
                     />
                     <Legend />
-                    <Bar dataKey="basketReturn" fill="hsl(var(--primary))" name="Portfolio Return (%)" />
-                    <Bar dataKey="indexReturn" fill="hsl(var(--secondary))" name="Index Return (%)" />
+                    <Bar dataKey="basketReturn" fill="hsl(var(--primary))" name="Portfolio Return %" />
+                    <Bar dataKey="indexReturn" fill="hsl(var(--chart-2))" name="Index Return %" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

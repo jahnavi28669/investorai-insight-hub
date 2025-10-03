@@ -56,9 +56,11 @@ export async function loadPortfolioData(filePath: string) {
     const tickerData = tickerSheet ? XLSX.utils.sheet_to_json(tickerSheet) : [];
     console.log('Ticker data rows:', tickerData.length);
 
+    const processedBasketData = processBasketData(basketData);
+
     return {
-      aggregate: processAggregateData(aggregateData),
-      basket: processBasketData(basketData),
+      aggregate: processAggregateData(aggregateData, processedBasketData.length),
+      basket: processedBasketData,
       ticker: processTickerData(tickerData),
     };
   } catch (error) {
@@ -67,13 +69,13 @@ export async function loadPortfolioData(filePath: string) {
   }
 }
 
-function processAggregateData(data: any[]): AggregateMetrics {
+function processAggregateData(data: any[], actualBasketCount: number): AggregateMetrics {
   if (!data || data.length === 0) {
     return {
       beatRatio: 0,
       avgBasketReturn: 0,
       basketVolatility: 0,
-      numberOfBaskets: 0,
+      numberOfBaskets: actualBasketCount,
       avgDrawdown: 0,
       winRatio: 0,
     };
@@ -83,7 +85,6 @@ function processAggregateData(data: any[]): AggregateMetrics {
   const beatRatios = data.map((row) => Number(row.basket_beat_ratio) || 0);
   const avgReturns = data.map((row) => Number(row.avg_basket_returns) || 0);
   const volatilities = data.map((row) => Number(row.std_basket_returns) || 0);
-  const baskets = data.map((row) => Number(row.number_of_baskets) || 0);
   const drawdowns = data.map((row) => Number(row.max_dd_strat) || 0);
   const winRatios = data.map((row) => Number(row.basket_win_ratio) || 0);
 
@@ -91,7 +92,7 @@ function processAggregateData(data: any[]): AggregateMetrics {
     beatRatio: calculateMean(beatRatios),
     avgBasketReturn: calculateMean(avgReturns),
     basketVolatility: calculateMean(volatilities),
-    numberOfBaskets: Math.round(calculateMean(baskets)),
+    numberOfBaskets: actualBasketCount,
     avgDrawdown: calculateMean(drawdowns),
     winRatio: calculateMean(winRatios),
   };
