@@ -5,13 +5,21 @@ import { DashboardHeader } from "./DashboardHeader";
 
 interface DashboardLayoutProps {
   children: ReactNode;
+  productSelectorProps?: {
+    selectedProduct: string;
+    onProductChange: (value: string) => void;
+    selectedVersion: string;
+    onVersionChange: (value: string) => void;
+    selectedReportType: string;
+    onReportTypeChange: (value: string) => void;
+  };
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, productSelectorProps }: DashboardLayoutProps) {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-background">
-        <DashboardSidebar />
+        <DashboardSidebar productSelectorProps={productSelectorProps} />
         <div className="flex-1 flex flex-col">
           <DashboardHeader />
           <main className="flex-1 p-6 overflow-auto">

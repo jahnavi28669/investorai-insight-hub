@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { ProductSelector } from "@/components/ProductSelector";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { AggregateMetrics } from "@/components/AggregateMetrics";
 import { AnalysisSelector } from "@/components/AnalysisSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,21 +74,17 @@ export default function Products() {
   }
 
   return (
-    <div className="flex h-full">
-      {/* Left Sidebar */}
-      <div className="w-80 flex-shrink-0">
-        <ProductSelector
-          selectedProduct={selectedProduct}
-          onProductChange={setSelectedProduct}
-          selectedVersion={selectedVersion}
-          onVersionChange={setSelectedVersion}
-          selectedReportType={reportingType}
-          onReportTypeChange={(value) => setReportingType(value as "Daily" | "Chained" | "Tranching")}
-        />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 p-6 space-y-6 overflow-auto">
+    <DashboardLayout
+      productSelectorProps={{
+        selectedProduct,
+        onProductChange: setSelectedProduct,
+        selectedVersion,
+        onVersionChange: setSelectedVersion,
+        selectedReportType: reportingType,
+        onReportTypeChange: (value) => setReportingType(value as "Daily" | "Chained" | "Tranching"),
+      }}
+    >
+      <div className="space-y-6">
         <Tabs defaultValue="aggregate" className="space-y-6">
         <TabsList className="bg-secondary">
           <TabsTrigger value="aggregate">Aggregate</TabsTrigger>
@@ -401,6 +397,6 @@ export default function Products() {
         )}
         </Tabs>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

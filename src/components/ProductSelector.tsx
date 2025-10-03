@@ -39,7 +39,7 @@ export function ProductSelector({
   onReportTypeChange,
 }: ProductSelectorProps) {
   return (
-    <div className="flex flex-col gap-6 p-6 bg-card border-r border-border h-full">
+    <div className="flex flex-col gap-4 px-4 pb-4">
       <div className="space-y-2">
         <Label htmlFor="product" className="text-sm font-medium text-foreground">
           Select Product

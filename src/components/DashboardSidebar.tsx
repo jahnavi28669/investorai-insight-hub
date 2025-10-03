@@ -11,6 +11,18 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { ProductSelector } from "./ProductSelector";
+
+interface DashboardSidebarProps {
+  productSelectorProps?: {
+    selectedProduct: string;
+    onProductChange: (value: string) => void;
+    selectedVersion: string;
+    onVersionChange: (value: string) => void;
+    selectedReportType: string;
+    onReportTypeChange: (value: string) => void;
+  };
+}
 
 const navigationItems = [
   { title: "Products", url: "/", icon: BarChart3 },
@@ -18,9 +30,10 @@ const navigationItems = [
   { title: "Frequency Insights", url: "/insights", icon: TrendingUp },
 ];
 
-export function DashboardSidebar() {
+export function DashboardSidebar({ productSelectorProps }: DashboardSidebarProps) {
   const { open } = useSidebar();
   const location = useLocation();
+  const showProductSelector = location.pathname === "/" && productSelectorProps;
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -63,6 +76,12 @@ export function DashboardSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {showProductSelector && open && (
+          <SidebarGroup className="mt-auto border-t border-sidebar-border pt-4">
+            <ProductSelector {...productSelectorProps} />
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );
