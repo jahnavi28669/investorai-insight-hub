@@ -10,9 +10,9 @@ import { loadPortfolioData, getTopPerformers, getWorstPerformers, getSectorAnaly
 import type { AggregateMetrics as AggregateData, BasketData, TickerData } from "@/services/portfolioDataService";
 
 export default function Products() {
-  const [selectedProduct, setSelectedProduct] = useState("Alpha Titan");
+  const [selectedProduct, setSelectedProduct] = useState("HDFC Long");
   const [selectedVersion, setSelectedVersion] = useState("v1 (Production)");
-  const [reportingType, setReportingType] = useState<"daily" | "chained" | "tranching">("daily");
+  const [reportingType, setReportingType] = useState<"Daily" | "Chained" | "Tranching">("Daily");
   const [basketAnalysis, setBasketAnalysis] = useState("portfolio-benchmark");
   const [tickerAnalysis, setTickerAnalysis] = useState("top-performers");
   
@@ -74,40 +74,29 @@ export default function Products() {
   }
 
   return (
-    <div className="space-y-6">
-      <ProductSelector
-        selectedProduct={selectedProduct}
-        onProductChange={setSelectedProduct}
-        selectedVersion={selectedVersion}
-        onVersionChange={setSelectedVersion}
-      />
+    <div className="flex h-full">
+      {/* Left Sidebar */}
+      <div className="w-80 flex-shrink-0">
+        <ProductSelector
+          selectedProduct={selectedProduct}
+          onProductChange={setSelectedProduct}
+          selectedVersion={selectedVersion}
+          onVersionChange={setSelectedVersion}
+          selectedReportType={reportingType}
+          onReportTypeChange={(value) => setReportingType(value as "Daily" | "Chained" | "Tranching")}
+        />
+      </div>
 
-      <Card className="bg-card border-border shadow-card">
-        <CardHeader>
-          <CardTitle className="text-foreground">Reporting Type</CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Choose your analysis perspective
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={reportingType} onValueChange={(v) => setReportingType(v as any)}>
-            <TabsList className="bg-secondary">
-              <TabsTrigger value="daily">Daily</TabsTrigger>
-              <TabsTrigger value="chained">Chained</TabsTrigger>
-              <TabsTrigger value="tranching">Tranching</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      <Tabs defaultValue="aggregate" className="space-y-6">
+      {/* Main Content */}
+      <div className="flex-1 p-6 space-y-6 overflow-auto">
+        <Tabs defaultValue="aggregate" className="space-y-6">
         <TabsList className="bg-secondary">
           <TabsTrigger value="aggregate">Aggregate</TabsTrigger>
           <TabsTrigger value="basket">Basket</TabsTrigger>
-          {reportingType !== "tranching" && <TabsTrigger value="tickers">Tickers</TabsTrigger>}
+          {reportingType !== "Tranching" && <TabsTrigger value="tickers">Tickers</TabsTrigger>}
           <TabsTrigger value="insights">Insights</TabsTrigger>
           <TabsTrigger value="production">Production Info</TabsTrigger>
-          {reportingType !== "daily" && <TabsTrigger value="tearsheet">Tear Sheet</TabsTrigger>}
+          {reportingType !== "Daily" && <TabsTrigger value="tearsheet">Tear Sheet</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="aggregate" className="space-y-4">
@@ -376,7 +365,7 @@ export default function Products() {
           </Card>
         </TabsContent>
 
-        {reportingType !== "daily" && (
+        {reportingType !== "Daily" && (
           <TabsContent value="tearsheet" className="space-y-4">
             <Card className="bg-card border-border shadow-card">
               <CardHeader>
@@ -410,7 +399,8 @@ export default function Products() {
             </Card>
           </TabsContent>
         )}
-      </Tabs>
+        </Tabs>
+      </div>
     </div>
   );
 }

@@ -12,6 +12,8 @@ interface ProductSelectorProps {
   onProductChange: (value: string) => void;
   selectedVersion: string;
   onVersionChange: (value: string) => void;
+  selectedReportType: string;
+  onReportTypeChange: (value: string) => void;
 }
 
 const products = [
@@ -26,14 +28,18 @@ const products = [
 
 const versions = ["v1 (Production)", "v2 (Contender)", "v3 (Contender)", "v4 (Contender)", "v5 (Contender)"];
 
+const reportTypes = ["Daily", "Chained", "Tranching"];
+
 export function ProductSelector({
   selectedProduct,
   onProductChange,
   selectedVersion,
   onVersionChange,
+  selectedReportType,
+  onReportTypeChange,
 }: ProductSelectorProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 bg-card rounded-xl border border-border shadow-card">
+    <div className="flex flex-col gap-6 p-6 bg-card border-r border-border h-full">
       <div className="space-y-2">
         <Label htmlFor="product" className="text-sm font-medium text-foreground">
           Select Product
@@ -42,7 +48,7 @@ export function ProductSelector({
           <SelectTrigger id="product" className="bg-secondary border-border">
             <SelectValue placeholder="Choose a product" />
           </SelectTrigger>
-          <SelectContent className="bg-popover border-border">
+          <SelectContent className="bg-popover border-border z-50">
             {products.map((product) => (
               <SelectItem key={product} value={product}>
                 {product}
@@ -60,10 +66,29 @@ export function ProductSelector({
           <SelectTrigger id="version" className="bg-secondary border-border">
             <SelectValue placeholder="Select version" />
           </SelectTrigger>
-          <SelectContent className="bg-popover border-border">
+          <SelectContent className="bg-popover border-border z-50">
             {versions.map((version) => (
               <SelectItem key={version} value={version}>
                 {version}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="reportType" className="text-sm font-medium text-foreground">
+          Reporting Type
+        </Label>
+        <p className="text-xs text-muted-foreground mb-2">Choose your analysis perspective</p>
+        <Select value={selectedReportType} onValueChange={onReportTypeChange}>
+          <SelectTrigger id="reportType" className="bg-secondary border-border">
+            <SelectValue placeholder="Select report type" />
+          </SelectTrigger>
+          <SelectContent className="bg-popover border-border z-50">
+            {reportTypes.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
               </SelectItem>
             ))}
           </SelectContent>
