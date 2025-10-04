@@ -85,7 +85,7 @@ function processAggregateData(data: any[], actualBasketCount: number): Aggregate
   const beatRatios = data.map((row) => Number(row.basket_beat_ratio) || 0);
   const avgReturns = data.map((row) => Number(row.avg_basket_returns) || 0);
   const volatilities = data.map((row) => Number(row.std_basket_returns) || 0);
-  const drawdowns = data.map((row) => Number(row.max_dd_strat) || 0);
+  const drawdowns = data.map((row) => parseDrawdown(row.avg_drawdown) || 0);
   const winRatios = data.map((row) => Number(row.basket_win_ratio) || 0);
 
   return {
@@ -93,9 +93,39 @@ function processAggregateData(data: any[], actualBasketCount: number): Aggregate
     avgBasketReturn: calculateMean(avgReturns),
     basketVolatility: calculateMean(volatilities),
     numberOfBaskets: actualBasketCount,
-    avgDrawdown: calculateMean(drawdowns),
+      avgDrawdown: calculateMean(drawdowns),
     winRatio: calculateMean(winRatios),
   };
+}
+
+/**
+ * Parse various drawdown formats into a decimal number (e.g. -0.1234 for -12.34%).
+ * Accepts numbers, percent strings like "12.34%" or "-12.34%", and parentheses like "(12.34%)".
+ */
+function parseDrawdown(value: any): number {
+  if (value === null || value === undefined || value === '') return 0;
+
+  // If already a number, assume it's decimal (e.g., -0.12) or whole percent (e.g., 12) depending on magnitude
+  if (typeof value === 'number') {
+    // If number looks like a percent (absolute value > 1), convert to decimal
+    if (Math.abs(value) > 1) return value / 100;
+    return value;
+  }
+
+  let s = String(value).trim();
+
+  // Handle parentheses for negative values: (12.34%) or (12.34)
+  const parenMatch = s.match(/^\((.*)\)$/);
+  if (parenMatch) s = `-${parenMatch[1].trim()}`;
+
+  // Remove percent sign and whitespace
+  const hasPercent = s.includes('%');
+  s = s.replace('%', '').replace(/,/g, '').trim();
+
+  const n = Number(s);
+  if (isNaN(n)) return 0;
+
+  return hasPercent || Math.abs(n) > 1 ? n / 100 : n;
 }
 
 function processBasketData(data: any[]): BasketData[] {
