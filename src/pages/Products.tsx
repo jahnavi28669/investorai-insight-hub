@@ -152,8 +152,8 @@ export default function Products() {
                       }}
                     />
                     <Legend />
-                    <Bar dataKey="basketReturn" fill="hsl(var(--primary))" name="Portfolio Return %" />
-                    <Bar dataKey="indexReturn" fill="hsl(var(--chart-2))" name="Index Return %" />
+                    <Bar dataKey="basketReturn" fill="#06B6D4" name="Portfolio Return %" />
+                    <Bar dataKey="indexReturn" fill="#F59E0B" name="Index Return %" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
