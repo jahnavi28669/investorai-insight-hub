@@ -56,11 +56,16 @@ export function AggregateMetrics({
       />
       <MetricCard
   title="Average Drawdown"
-  value={`${(avgDrawdown * 100).toFixed(2)}%`}
+  value={
+    avgDrawdown !== undefined && !isNaN(Number(avgDrawdown))
+      ? `${(Number(avgDrawdown) * 100).toFixed(2)}%`
+      : "N/A"
+  }
   icon={TrendingDown}
-  trend={avgDrawdown < 0 ? "down" : "neutral"}
+  trend={Number(avgDrawdown) < 0 ? "down" : "neutral"}
   subtitle="Max Loss from Peak"
 />
+
     </div>
   );
 }
