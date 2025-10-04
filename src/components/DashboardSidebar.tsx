@@ -76,13 +76,19 @@ export function DashboardSidebar({ productSelectorProps }: DashboardSidebarProps
                       onOpenChange={setProductsExpanded}
                     >
                       <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton isActive={isActive}>
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                            <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${productsExpanded ? 'rotate-180' : ''}`} />
+                        <div className="flex items-center w-full">
+                          <SidebarMenuButton asChild isActive={isActive} className="flex-1">
+                            <NavLink to={item.url} className="transition-smooth">
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </NavLink>
                           </SidebarMenuButton>
-                        </CollapsibleTrigger>
+                          <CollapsibleTrigger asChild>
+                            <button className="p-1 hover:bg-accent rounded-sm mr-2">
+                              <ChevronDown className={`h-4 w-4 transition-transform ${productsExpanded ? 'rotate-180' : ''}`} />
+                            </button>
+                          </CollapsibleTrigger>
+                        </div>
                       </SidebarMenuItem>
                       <CollapsibleContent>
                         {productSelectorProps && isActive && (

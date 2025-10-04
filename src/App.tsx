@@ -19,8 +19,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/tearsheet" element={<DashboardLayout><TearSheet /></DashboardLayout>} />
-          <Route path="/insights" element={<DashboardLayout><FrequencyInsights /></DashboardLayout>} />
+          <Route path="/tearsheet" element={<TearSheet />} />
+          <Route path="/insights" element={<FrequencyInsights />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
