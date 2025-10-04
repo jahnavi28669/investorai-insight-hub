@@ -2,26 +2,26 @@ import { TrendingUp, Target, Activity, Layers, TrendingDown, BarChart3 } from "l
 import { MetricCard } from "./MetricCard";
 
 interface AggregateMetricsProps {
-  beatRatio: number;
-  beatCount: number;
-  winRatio: number;
-  winCount: number;
-  totalBaskets: number;
-  avgBasketReturn: number;
-  basketVolatility: number;
-  avgDrawdown: number;
+  beatRatio: number;          // e.g. 0.302 for 30.2%
+  winRatio: number;           // e.g. 0.492 for 49.2%
+  totalBaskets: number;       // e.g. 63
+  avgBasketReturn: number;    // e.g. 0.0015 for 0.15%
+  basketVolatility: number;   // e.g. 0.0246 for 2.46%
+  avgDrawdown: number;        // e.g. -0.0311 for -3.11%
 }
 
 export function AggregateMetrics({
   beatRatio,
-  beatCount,
   winRatio,
-  winCount,
   totalBaskets,
   avgBasketReturn,
   basketVolatility,
   avgDrawdown,
 }: AggregateMetricsProps) {
+  // ✅ Compute counts automatically
+  const winCount = Math.round(winRatio * totalBaskets);
+  const beatCount = Math.round(beatRatio * totalBaskets);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {/* Win Ratio */}
