@@ -6,8 +6,10 @@ import { AnalysisSelector } from "@/components/AnalysisSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+ 
 import { loadPortfolioData, getTopPerformers, getWorstPerformers, getSectorAnalysis } from "@/services/portfolioDataService";
 import type { AggregateMetrics as AggregateData, BasketData, TickerData } from "@/services/portfolioDataService";
+ 
 
 export default function Products() {
   const [selectedProduct, setSelectedProduct] = useState("Alpha Titan");
@@ -64,6 +66,8 @@ export default function Products() {
   const topPerformers = getTopPerformers(tickerData, 10);
   const worstPerformers = getWorstPerformers(tickerData, 10);
   const sectorAnalysis = getSectorAnalysis(tickerData);
+
+  
 
   if (loading) {
     return (
@@ -128,7 +132,7 @@ export default function Products() {
                   <BarChart data={basketData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
-                      dataKey="date" 
+                      dataKey="date"
                       stroke="hsl(var(--muted-foreground))"
                       tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
                       angle={-45}
