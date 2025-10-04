@@ -9,7 +9,13 @@ interface MetricCardProps {
   subtitle?: string;
 }
 
-export function MetricCard({ title, value, icon: Icon, trend = "neutral", subtitle }: MetricCardProps) {
+export function MetricCard({
+  title,
+  value,
+  icon: Icon,
+  trend = "neutral",
+  subtitle,
+}: MetricCardProps) {
   const getTrendColor = () => {
     switch (trend) {
       case "up":
