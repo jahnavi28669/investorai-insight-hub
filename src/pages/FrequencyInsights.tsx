@@ -1,8 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardLayout } from "@/components/DashboardLayout";
 
 export default function FrequencyInsights() {
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <Card className="bg-card border-border shadow-card">
         <CardHeader>
           <CardTitle className="text-2xl text-foreground">Frequency Insights</CardTitle>
@@ -16,6 +18,7 @@ export default function FrequencyInsights() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

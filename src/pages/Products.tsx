@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ProductSelector } from "@/components/ProductSelector";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AggregateMetrics } from "@/components/AggregateMetrics";
 import { AnalysisSelector } from "@/components/AnalysisSelector";
@@ -67,40 +67,36 @@ export default function Products() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-muted-foreground">Loading portfolio data...</div>
-      </div>
+      <DashboardLayout
+        productSelectorProps={{
+          selectedProduct,
+          onProductChange: setSelectedProduct,
+          selectedVersion,
+          onVersionChange: setSelectedVersion,
+          reportingType,
+          onReportingTypeChange: setReportingType,
+        }}
+      >
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-muted-foreground">Loading portfolio data...</div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <ProductSelector
-        selectedProduct={selectedProduct}
-        onProductChange={setSelectedProduct}
-        selectedVersion={selectedVersion}
-        onVersionChange={setSelectedVersion}
-      />
-
-      <Card className="bg-card border-border shadow-card">
-        <CardHeader>
-          <CardTitle className="text-foreground">Reporting Type</CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Choose your analysis perspective
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={reportingType} onValueChange={(v) => setReportingType(v as any)}>
-            <TabsList className="bg-secondary">
-              <TabsTrigger value="daily">Daily</TabsTrigger>
-              <TabsTrigger value="chained">Chained</TabsTrigger>
-              <TabsTrigger value="tranching">Tranching</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      <Tabs defaultValue="aggregate" className="space-y-6">
+    <DashboardLayout
+      productSelectorProps={{
+        selectedProduct,
+        onProductChange: setSelectedProduct,
+        selectedVersion,
+        onVersionChange: setSelectedVersion,
+        reportingType,
+        onReportingTypeChange: setReportingType,
+      }}
+    >
+      <div className="space-y-6">
+        <Tabs defaultValue="aggregate" className="space-y-6">
         <TabsList className="bg-secondary">
           <TabsTrigger value="aggregate">Aggregate</TabsTrigger>
           <TabsTrigger value="basket">Basket</TabsTrigger>
@@ -410,7 +406,8 @@ export default function Products() {
             </Card>
           </TabsContent>
         )}
-      </Tabs>
-    </div>
+        </Tabs>
+      </div>
+    </DashboardLayout>
   );
 }
