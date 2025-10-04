@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import { ProductSelector } from "@/components/ProductSelector";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AggregateMetrics } from "@/components/AggregateMetrics";
 import { AnalysisSelector } from "@/components/AnalysisSelector";
@@ -67,25 +67,39 @@ export default function Products() {
 
   if (loading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-muted-foreground">Loading portfolio data...</div>
-        </div>
-      </DashboardLayout>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-muted-foreground">Loading portfolio data...</div>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout
-      productSelectorProps={{
-        selectedProduct,
-        onProductChange: setSelectedProduct,
-        selectedVersion,
-        onVersionChange: setSelectedVersion,
-        reportingType,
-        onReportingTypeChange: (v) => setReportingType(v as any),
-      }}
-    >
+    <div className="space-y-6">
+      <ProductSelector
+        selectedProduct={selectedProduct}
+        onProductChange={setSelectedProduct}
+        selectedVersion={selectedVersion}
+        onVersionChange={setSelectedVersion}
+      />
+
+      <Card className="bg-card border-border shadow-card">
+        <CardHeader>
+          <CardTitle className="text-foreground">Reporting Type</CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Choose your analysis perspective
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={reportingType} onValueChange={(v) => setReportingType(v as any)}>
+            <TabsList className="bg-secondary">
+              <TabsTrigger value="daily">Daily</TabsTrigger>
+              <TabsTrigger value="chained">Chained</TabsTrigger>
+              <TabsTrigger value="tranching">Tranching</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="aggregate" className="space-y-6">
         <TabsList className="bg-secondary">
           <TabsTrigger value="aggregate">Aggregate</TabsTrigger>
@@ -397,6 +411,6 @@ export default function Products() {
           </TabsContent>
         )}
       </Tabs>
-    </DashboardLayout>
+    </div>
   );
 }
