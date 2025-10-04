@@ -55,12 +55,12 @@ export function AggregateMetrics({
         subtitle="Rebalancing Periods"
       />
       <MetricCard
-        title="Average Drawdown"
-        value={`${(avgDrawdown * 100).toFixed(2)}%`}
-        icon={TrendingDown}
-        trend={avgDrawdown < 0 ? "down" : "neutral"}
-        subtitle="Max Loss from Peak"
-      />
+  title="Average Drawdown"
+  value={`${(avgDrawdown * 100).toFixed(2)}%`}
+  icon={TrendingDown}
+  trend={avgDrawdown < 0 ? "down" : "neutral"}
+  subtitle="Max Loss from Peak"
+/>
     </div>
   );
 }
