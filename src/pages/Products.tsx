@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
  
-import { loadPortfolioData, getTopPerformers, getWorstPerformers, getSectorAnalysis } from "@/services/portfolioDataService";
+import { loadPortfolioData, getTopPerformers, getWorstPerformers, getSectorAnalysis, getTickerStats } from "@/services/portfolioDataService";
 import type { AggregateMetrics as AggregateData, BasketData, TickerData } from "@/services/portfolioDataService";
  
 
@@ -66,6 +66,7 @@ export default function Products() {
   const topPerformers = getTopPerformers(tickerData, 10);
   const worstPerformers = getWorstPerformers(tickerData, 10);
   const sectorAnalysis = getSectorAnalysis(tickerData);
+  const tickerStats = getTickerStats(tickerData);
 
   
 
@@ -212,16 +213,20 @@ export default function Products() {
             <CardContent>
               {tickerAnalysis === "top-performers" && (
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={topPerformers}>
+                  <BarChart data={topPerformers} layout="horizontal">
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
-                      dataKey="ticker" 
+                      type="number"
                       stroke="hsl(var(--muted-foreground))"
                       tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tickFormatter={(value) => `${value.toFixed(1)}%`}
                     />
                     <YAxis 
+                      type="category"
+                      dataKey="ticker"
                       stroke="hsl(var(--muted-foreground))"
                       tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      width={80}
                     />
                     <Tooltip 
                       contentStyle={{
@@ -229,25 +234,29 @@ export default function Products() {
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
                       }}
+                      formatter={(value: number) => [`${value.toFixed(2)}%`, 'Return']}
                     />
-                    <Legend />
-                    <Bar dataKey="return" fill="hsl(var(--success))" name="Return (%)" />
+                    <Bar dataKey="return" fill="#10B981" name="Return (%)" />
                   </BarChart>
                 </ResponsiveContainer>
               )}
 
               {tickerAnalysis === "worst-performers" && (
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={worstPerformers}>
+                  <BarChart data={worstPerformers} layout="horizontal">
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
-                      dataKey="ticker" 
+                      type="number"
                       stroke="hsl(var(--muted-foreground))"
                       tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tickFormatter={(value) => `${value.toFixed(1)}%`}
                     />
                     <YAxis 
+                      type="category"
+                      dataKey="ticker"
                       stroke="hsl(var(--muted-foreground))"
                       tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      width={80}
                     />
                     <Tooltip 
                       contentStyle={{
@@ -255,9 +264,9 @@ export default function Products() {
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
                       }}
+                      formatter={(value: number) => [`${value.toFixed(2)}%`, 'Return']}
                     />
-                    <Legend />
-                    <Bar dataKey="return" fill="hsl(var(--destructive))" name="Return (%)" />
+                    <Bar dataKey="return" fill="#EF4444" name="Return (%)" />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -297,20 +306,22 @@ export default function Products() {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-foreground sticky top-0 bg-card">Ticker</TableHead>
-                        <TableHead className="text-foreground sticky top-0 bg-card">Date</TableHead>
-                        <TableHead className="text-foreground sticky top-0 bg-card">Return (%)</TableHead>
-                        <TableHead className="text-foreground sticky top-0 bg-card">Sector</TableHead>
+                        <TableHead className="text-foreground sticky top-0 bg-card text-right">Mean (%)</TableHead>
+                        <TableHead className="text-foreground sticky top-0 bg-card text-right">Std Dev (%)</TableHead>
+                        <TableHead className="text-foreground sticky top-0 bg-card text-right">Count</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {tickerData.slice(0, 100).map((row, idx) => (
+                      {tickerStats.map((stat, idx) => (
                         <TableRow key={idx}>
-                          <TableCell className="text-foreground font-medium">{row.ticker}</TableCell>
-                          <TableCell className="text-foreground">{row.date}</TableCell>
-                          <TableCell className={row.return > 0 ? "text-success" : "text-destructive"}>
-                            {row.return.toFixed(2)}%
+                          <TableCell className="text-foreground font-medium">{stat.ticker}</TableCell>
+                          <TableCell className={`text-right ${stat.mean > 0 ? "text-success" : "text-destructive"}`}>
+                            {stat.mean.toFixed(2)}%
                           </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{row.gicsSector}</TableCell>
+                          <TableCell className="text-foreground text-right">
+                            {stat.stdDev.toFixed(2)}%
+                          </TableCell>
+                          <TableCell className="text-foreground text-right">{stat.count}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

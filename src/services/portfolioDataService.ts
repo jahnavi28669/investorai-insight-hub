@@ -177,16 +177,46 @@ function formatDate(dateValue: any): string {
   return String(dateValue);
 }
 
-export function getTopPerformers(tickerData: TickerData[], limit: number = 10): TickerData[] {
-  return [...tickerData]
-    .sort((a, b) => b.return - a.return)
-    .slice(0, limit);
+export function getTopPerformers(tickerData: TickerData[], limit: number = 10): { ticker: string; return: number }[] {
+  // Group by ticker and calculate cumulative return
+  const tickerMap = new Map<string, number[]>();
+  
+  tickerData.forEach((ticker) => {
+    const returns = tickerMap.get(ticker.ticker) || [];
+    returns.push(ticker.return / 100); // Convert to decimal
+    tickerMap.set(ticker.ticker, returns);
+  });
+
+  // Calculate cumulative return for each ticker
+  const tickerReturns = Array.from(tickerMap.entries()).map(([ticker, returns]) => {
+    const cumulativeReturn = returns.reduce((acc, ret) => acc * (1 + ret), 1) - 1;
+    return { ticker, return: cumulativeReturn * 100 }; // Convert back to percentage
+  });
+
+  // Get only required number of unique tickers
+  const sorted = tickerReturns.sort((a, b) => b.return - a.return);
+  return sorted.slice(0, Math.min(limit, sorted.length));
 }
 
-export function getWorstPerformers(tickerData: TickerData[], limit: number = 10): TickerData[] {
-  return [...tickerData]
-    .sort((a, b) => a.return - b.return)
-    .slice(0, limit);
+export function getWorstPerformers(tickerData: TickerData[], limit: number = 10): { ticker: string; return: number }[] {
+  // Group by ticker and calculate cumulative return
+  const tickerMap = new Map<string, number[]>();
+  
+  tickerData.forEach((ticker) => {
+    const returns = tickerMap.get(ticker.ticker) || [];
+    returns.push(ticker.return / 100); // Convert to decimal
+    tickerMap.set(ticker.ticker, returns);
+  });
+
+  // Calculate cumulative return for each ticker
+  const tickerReturns = Array.from(tickerMap.entries()).map(([ticker, returns]) => {
+    const cumulativeReturn = returns.reduce((acc, ret) => acc * (1 + ret), 1) - 1;
+    return { ticker, return: cumulativeReturn * 100 }; // Convert back to percentage
+  });
+
+  // Get only required number of unique tickers
+  const sorted = tickerReturns.sort((a, b) => a.return - b.return);
+  return sorted.slice(0, Math.min(limit, sorted.length));
 }
 
 export function getSectorAnalysis(tickerData: TickerData[]): { sector: string; avgReturn: number; count: number }[] {
@@ -208,4 +238,29 @@ export function getSectorAnalysis(tickerData: TickerData[]): { sector: string; a
       count: data.count,
     }))
     .sort((a, b) => b.avgReturn - a.avgReturn);
+}
+
+export function getTickerStats(tickerData: TickerData[]): { ticker: string; mean: number; stdDev: number; count: number }[] {
+  const tickerMap = new Map<string, number[]>();
+  
+  tickerData.forEach((ticker) => {
+    const returns = tickerMap.get(ticker.ticker) || [];
+    returns.push(ticker.return);
+    tickerMap.set(ticker.ticker, returns);
+  });
+
+  return Array.from(tickerMap.entries())
+    .map(([ticker, returns]) => {
+      const mean = returns.reduce((sum, val) => sum + val, 0) / returns.length;
+      const variance = returns.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / returns.length;
+      const stdDev = Math.sqrt(variance);
+      
+      return {
+        ticker,
+        mean,
+        stdDev,
+        count: returns.length,
+      };
+    })
+    .sort((a, b) => b.mean - a.mean);
 }
